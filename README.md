@@ -4,7 +4,7 @@
 
 ### Overview
 
-This is a reimplementation of the Transformer model from the paper [Evaluating Protein Transfer Learning with TAPE by Rao et al.](https://arxiv.org/pdf/1906.08230.pdf). We focus on a single biological task: Secondary Structure (SS) Prediction. The GitHub for the paper with the model architectures implemented in PyTorch and data is [here](https://github.com/songlab-cal/tape). 
+This is a reimplementation of the Transformer model from the paper [Evaluating Protein Transfer Learning with TAPE by Rao et al](https://arxiv.org/pdf/1906.08230.pdf). We focus on a single biological task: Secondary Structure (SS) Prediction. The GitHub for the paper with the model architectures implemented in PyTorch and data is [here](https://github.com/songlab-cal/tape). 
 
 ### Dependencies
 
