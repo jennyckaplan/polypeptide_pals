@@ -9,6 +9,8 @@ This is a reimplementation of the Transformer model from the paper [Evaluating P
 ### Dependencies
 
 - wget (for MacOS: run `brew install wget`)
+- tensorflow 2.3.0
+- numpy 1.17.3+
 
 ### Data
 

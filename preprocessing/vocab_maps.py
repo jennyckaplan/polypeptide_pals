@@ -1,1 +1,66 @@
+# Letter codes standard for IUPAC. See here: https://www.bioinformatics.org/sms2/iupac.html
+PFAM_VOCAB = {
+    '<PAD>': 0,
+    '<MASK>': 1,
+    '<CLS>': 2,
+    '<SEP>': 3,
+    'A': 4,
+    'B': 5,
+    'C': 6,
+    'D': 7,
+    'E': 8,
+    'F': 9,
+    'G': 10,
+    'H': 11,
+    'I': 12,
+    'K': 13,
+    'L': 14,
+    'M': 15,
+    'N': 16,
+    'O': 17,
+    'P': 18,
+    'Q': 19,
+    'R': 20,
+    'S': 21,
+    'T': 22,
+    'U': 23,
+    'V': 24,
+    'W': 25,
+    'X': 26,
+    'Y': 27,
+    'Z': 28}
 
+AA_DICT = {
+    'X': -1,  # unknown
+    'A': 0,
+    'C': 1,
+    'D': 2,
+    'E': 3,
+    'F': 4,
+    'G': 5,
+    'H': 6,
+    'I': 7,
+    'K': 8,
+    'L': 9,
+    'M': 10,
+    'N': 11,
+    'P': 12,
+    'Q': 13,
+    'R': 14,
+    'S': 15,
+    'T': 16,
+    'V': 17,
+    'W': 18,
+    'Y': 19}
+
+FLIPPED_AA = {v: k for k, v in AA_DICT.items()}
+
+
+SS_8_TO_3_ENCODED = {0: 0,
+                     1: 0,
+                     2: 0,
+                     3: 1,
+                     4: 1,
+                     5: 2,
+                     6: 2,
+                     7: 2}
