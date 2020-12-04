@@ -1,6 +1,6 @@
-## Developing Unprecedentedly Competent Transformers for TAPE 
-(Tasks Assessing Protein Embeddings)
----
+## Developing Unprecedentedly Competent Transformers for TAPE
+
+## (Tasks Assessing Protein Embeddings)
 
 ### Overview
 
