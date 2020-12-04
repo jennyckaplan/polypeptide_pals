@@ -42,7 +42,8 @@ class TransformerInputEmbedding(Model):
 
         self.kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
         self.bias_regularizer = tf.keras.regularizers.get(bias_regularizer)
-        self.activity_regularizer = tf.keras.regularizers.get(activity_regularizer)
+        self.activity_regularizer = tf.keras.regularizers.get(
+            activity_regularizer)
 
         if discrete:
             assert n_symbols is not None, 'n_symbols not passed in but model set to discrete'

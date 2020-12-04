@@ -1,11 +1,11 @@
 from typing import Optional, Tuple, List
 
 import numpy as np
-from sacred import Ingredient
 
 import tensorflow as tf
-import rinokeras as rk
-import TransformerInputEmbedding, TransformerEncoder
+from transformer_input_embedding import TransformerInputEmbedding
+from transformer_encoder import TransformerEncoder
+
 
 class Transformer():
 
@@ -35,17 +35,7 @@ class Transformer():
 
         print(self)
 
-    # def __str__(self) -> str:
-    #     outstr = []
-    #     outstr.append('Transformer with Parameters:')
-    #     outstr.append(f'\tn_layers: {self.n_layers}')
-    #     outstr.append(f'\tn_heads: {self.n_heads}')
-    #     outstr.append(f'\td_model: {self.d_model}')
-    #     outstr.append(f'\td_filter: {self.d_filter}')
-    #     outstr.append(f'\tdropout: {self.dropout}')
-    #     return '\n'.join(outstr)
-
-    def convert_to_attention_mask(self,sequence, sequence_lengths):
+    def convert_to_attention_mask(self, sequence, sequence_lengths):
         """Given a padded input tensor of sequences and a tensor of lengths, returns
         a boolean mask for each position in the sequence indicating whether or not
         that position is padding.
@@ -55,7 +45,8 @@ class Transformer():
         Returns:
             tf.Tensor[bool]: Tensor of shape [batch_size, sequence_length]
         """
-        indices = tf.tile(tf.range(tf.shape(sequence)[1])[None, :], (tf.shape(sequence_lengths)[0], 1))
+        indices = tf.tile(tf.range(tf.shape(sequence)[1])[
+                          None, :], (tf.shape(sequence_lengths)[0], 1))
         mask = indices < sequence_lengths[:, None]
         return mask
 
@@ -70,11 +61,11 @@ class Transformer():
                 a tensor with shape [batch_size, MAX_PROTEIN_LENGTH, d_model]
         """
 
-
         sequence = inputs['primary']
         protein_length = inputs['protein_length']
 
-        attention_mask = self.convert_to_attention_mask(sequence, protein_length)
+        attention_mask = self.convert_to_attention_mask(
+            sequence, protein_length)
 
         encoder_output = self.encoder(sequence, mask=attention_mask)
         inputs['encoder_output'] = encoder_output
