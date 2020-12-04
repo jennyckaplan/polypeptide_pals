@@ -1,5 +1,5 @@
 import AminoAcidClassPredictor
-import tf as tensorflow
+import tensorflow as tf
 
 class SequenceToSequenceClassificationTask(Task):
 
