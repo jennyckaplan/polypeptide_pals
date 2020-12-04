@@ -3,11 +3,12 @@ from typing import Optional, Tuple, List
 import numpy as np
 
 import tensorflow as tf
+from tensorflow.keras import Model
 from transformer_input_embedding import TransformerInputEmbedding
 from transformer_encoder import TransformerEncoder
 
 
-class Transformer:
+class Transformer(Model):
 
     def __init__(self,
                  n_symbols: int,
@@ -18,7 +19,7 @@ class Transformer:
                  dropout: Optional[float] = 0.1,
                  layer_dropout: Optional[float] = None,
                  kernel_regularizer: Optional[str] = None) -> None:
-
+        super().__init__()
         self.n_layers = n_layers
         self.n_heads = n_heads
         self.d_model = d_model
