@@ -1,7 +1,6 @@
 from preprocess import deserialize_secondary_structure
 
-from .Task import SequenceToSequenceClassificationTask
-
+from seq2seq import SequenceToSequenceClassificationTask
 
 class SecondaryStructureTask(SequenceToSequenceClassificationTask):
 

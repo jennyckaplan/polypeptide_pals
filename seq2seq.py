@@ -1,5 +1,8 @@
-import AminoAcidClassPredictor
 import tensorflow as tf
+from amino_acid_class_predictor import AminoAcidClassPredictor
+from losses import classification_loss_and_accuracy
+from task import Task
+from typing import Callable, Dict, Tuple, List
 
 class SequenceToSequenceClassificationTask(Task):
 

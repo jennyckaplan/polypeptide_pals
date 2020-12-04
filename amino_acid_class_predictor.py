@@ -1,5 +1,5 @@
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Conv1D, Dense, Layer, Sequential, LayerNormalization
+from tensorflow.keras import Model, Sequential
+from tensorflow.keras.layers import Conv1D, Dense, Layer, LayerNormalization
 
 class AminoAcidClassPredictor(Model):
 
