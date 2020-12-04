@@ -3,8 +3,9 @@ from typing import Optional, Tuple, List
 import numpy as np
 from sacred import Ingredient
 
+import tensorflow as tf
 import rinokeras as rk
-from rinokeras.models.transformer import TransformerInputEmbedding, TransformerEncoder
+import TransformerInputEmbedding, TransformerEncoder
 
 class Transformer():
 
@@ -44,7 +45,7 @@ class Transformer():
     #     outstr.append(f'\tdropout: {self.dropout}')
     #     return '\n'.join(outstr)
 
-    def convert_to_attention_mask(sequence, sequence_lengths):
+    def convert_to_attention_mask(self,sequence, sequence_lengths):
         """Given a padded input tensor of sequences and a tensor of lengths, returns
         a boolean mask for each position in the sequence indicating whether or not
         that position is padding.
@@ -54,10 +55,9 @@ class Transformer():
         Returns:
             tf.Tensor[bool]: Tensor of shape [batch_size, sequence_length]
         """
-        with tf.control_dependencies([batch_assert, rank_assert]):
-            indices = tf.tile(tf.range(tf.shape(sequence)[1])[None, :], (tf.shape(sequence_lengths)[0], 1))
-            mask = indices < sequence_lengths[:, None]
-            return mask
+        indices = tf.tile(tf.range(tf.shape(sequence)[1])[None, :], (tf.shape(sequence_lengths)[0], 1))
+        mask = indices < sequence_lengths[:, None]
+        return mask
 
     def call(self, inputs):
         """
@@ -74,7 +74,7 @@ class Transformer():
         sequence = inputs['primary']
         protein_length = inputs['protein_length']
 
-        attention_mask = convert_to_attention_mask(sequence, protein_length)
+        attention_mask = self.convert_to_attention_mask(sequence, protein_length)
 
         encoder_output = self.encoder(sequence, mask=attention_mask)
         inputs['encoder_output'] = encoder_output
