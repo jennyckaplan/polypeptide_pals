@@ -9,7 +9,7 @@ from typing import Optional
 from pathlib import Path
 
 from vocab import PFAM_VOCAB
-from transformer import Transformer
+from transformer_model import Transformer
 from task_builder import TaskBuilder
 
 
