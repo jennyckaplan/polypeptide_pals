@@ -1,3 +1,6 @@
+import AminoAcidClassPredictor
+import tf as tensorflow
+
 class SequenceToSequenceClassificationTask(Task):
 
     def __init__(self,
