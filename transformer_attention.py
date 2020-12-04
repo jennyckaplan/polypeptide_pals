@@ -20,8 +20,8 @@ class TransformerSelfAttention(tf.keras.Model):
                  use_residual_norm: bool = True,
                  kernel_initializer: Optional[tf.keras.initializers.Initializer] = 'glorot_uniform',
                  kernel_regularizer: Optional[tf.keras.regularizers.Regularizer] = None,
-                 bias_regularizer : Optional[tf.keras.regularizers.Regularizer] = None,
-                 activity_regularizer : Optional[tf.keras.regularizers.Regularizer] = None) -> None:
+                 bias_regularizer: Optional[tf.keras.regularizers.Regularizer] = None,
+                 activity_regularizer: Optional[tf.keras.regularizers.Regularizer] = None) -> None:
         super().__init__()
         self.n_heads = n_heads
         self.dropout = dropout
@@ -39,13 +39,14 @@ class TransformerSelfAttention(tf.keras.Model):
         self.kernel_initializer = tf.keras.initializers.get(kernel_initializer)
         self.kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
         self.bias_regularizer = tf.keras.regularizers.get(bias_regularizer)
-        self.activity_regularizer = tf.keras.regularizers.get(activity_regularizer)
+        self.activity_regularizer = tf.keras.regularizers.get(
+            activity_regularizer)
 
     def call(self, inputs, mask=None, return_attention_weights=False):
         attn_inputs = self.norm(inputs) if self.use_residual_norm else inputs
         attention, attention_weights = self.self_attention(
             attn_inputs, mask=mask, return_attention_weights=True)
-        
+
         # Residual connection on the attention block
         output = inputs + attention
         if not self.use_residual_norm:
@@ -107,7 +108,8 @@ class TransformerMultiAttention(tf.keras.Model):
         self.kernel_initializer = tf.keras.initializers.get(kernel_initializer)
         self.kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
         self.bias_regularizer = tf.keras.regularizers.get(bias_regularizer)
-        self.activity_regularizer = tf.keras.regularizers.get(activity_regularizer)
+        self.activity_regularizer = tf.keras.regularizers.get(
+            activity_regularizer)
 
     def call(self, inputs, mask=None, return_attention_weights=False):
         source, target = inputs
