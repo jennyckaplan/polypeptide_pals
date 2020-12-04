@@ -11,12 +11,12 @@ from pathlib import Path
 from vocab import PFAM_VOCAB
 from transformer_model import Transformer
 from task_builder import TaskBuilder
+from secondary_structure import SecondaryStructureTask
 
 
 def run_embed(datafile: str,
               model_name: str,
-              load_from: Optional[str] = None,
-              task_name: Optional[str] = None):
+              load_from: str):
 
     datapath = Path(datafile)
     if not datapath.exists():
@@ -31,14 +31,13 @@ def run_embed(datafile: str,
         if not load_path.exists():
             raise FileNotFoundError(load_path)
 
-    sess = tf.InteractiveSession()
+    sess = tf.compat.v1.InteractiveSession()
     K.set_learning_phase(0)
     n_symbols = len(PFAM_VOCAB)
     embedding_model = Transformer(n_symbols)
 
-    if task_name is not None:
-        task = TaskBuilder.build_task(task_name)
-        deserialization_func = task.deserialization_func
+    task = SecondaryStructureTask()
+    deserialization_func = task.deserialization_func
 
     data = tf.data.TFRecordDataset(str(datapath)).map(deserialization_func)
     data = data.batch(1)
@@ -72,7 +71,7 @@ def main():
     args = parser.parse_args()
 
     embeddings = run_embed(args.datafile, args.model,
-                           args.load_from, args.task)
+                           args.load_from)
 
     with open(args.output, 'wb') as f:
         pkl.dump(embeddings, f)

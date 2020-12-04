@@ -7,6 +7,8 @@ from typing import Dict, Tuple, List, Callable
 This is the generic Task class used to prepare the datasets
 and get train and test data for a task.
 """
+
+
 class Task:
 
     """
@@ -14,6 +16,7 @@ class Task:
     and the deserialization function (for converting TFRecord to features)
     for the task.
     """
+
     def __init__(self,
                  key_metric: str,
                  deserialization_func: Callable[[bytes], Dict[str, tf.Tensor]]):
@@ -24,6 +27,7 @@ class Task:
     This function gets the length of a data element for batching
     according to length.
     """
+
     def protein_length_function(self, data):
         return data['protein_length']
 
@@ -31,6 +35,7 @@ class Task:
     This function prepares the dataset by shuffling the data,
     and batching it.
     """
+
     def prepare_dataset(self,
                         dataset: tf.data.Dataset,
                         buckets: List[int],
@@ -65,6 +70,7 @@ class Task:
     initializes the TFRecordDatasets and prepares the train
     and valid data.
     """
+
     def get_train_data(self,
                        boundaries: Tuple[List[int], List[int]],
                        train_file: str,
@@ -94,6 +100,7 @@ class Task:
     initializes the TFRecordDataset and prepares the test
     data.
     """
+
     def get_test_data(self,
                       boundaries: Tuple[List[int], List[int]],
                       test_file: str) -> tf.data.Dataset:
