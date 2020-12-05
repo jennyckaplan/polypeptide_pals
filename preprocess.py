@@ -18,10 +18,10 @@ def deserialize_secondary_structure(example):
         'psi': tf.io.FixedLenSequenceFeature([], tf.float32),
         'rsa': tf.io.FixedLenSequenceFeature([], tf.float32),
         'asa_max': tf.io.FixedLenSequenceFeature([], tf.float32),
-        'valid_mask': tf.FixedLenSequenceFeature([], tf.float32)
+        'valid_mask': tf.io.FixedLenSequenceFeature([], tf.float32)
     }
 
-    context, features = tf.parse_single_sequence_example(
+    context, features = tf.io.parse_single_sequence_example(
         example,
         context_features=context,
         sequence_features=features

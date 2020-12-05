@@ -41,7 +41,8 @@ def run_embed(datafile: str,
 
     data = tf.data.TFRecordDataset(str(datapath)).map(deserialization_func)
     data = data.batch(1)
-    iterator = data.make_one_shot_iterator()
+    print (data)
+    iterator = tf.compat.v1.data.make_one_shot_iterator(data)
     batch = iterator.get_next()
     output = embedding_model(batch)
     if load_path is not None:

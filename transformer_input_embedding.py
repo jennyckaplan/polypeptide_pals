@@ -7,8 +7,8 @@ from typing import Optional
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Embedding, Lambda, Dropout, BatchNormalization
 
-from rinokeras.core.v1x.common.layers import WeightNormDense as Dense
-from rinokeras.core.v1x.common.layers import DenseStack, PositionEmbedding
+#from rinokeras.core.v1x.common.layers import WeightNormDense as Dense
+#from rinokeras.core.v1x.common.layers import DenseStack, PositionEmbedding
 
 
 class TransformerInputEmbedding(Model):

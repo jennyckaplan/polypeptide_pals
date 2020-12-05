@@ -55,7 +55,8 @@ class TransformerFeedForward(Model):
         self.kernel_initializer = tf.keras.initializers.get(kernel_initializer)
         self.kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
         self.bias_regularizer = tf.keras.regularizers.get(bias_regularizer)
-        self.activity_regularizer = tf.keras.regularizers.get(activity_regularizer)
+        self.activity_regularizer = tf.keras.regularizers.get(
+            activity_regularizer)
 
     def call(self, inputs, padding_mask=None):
         if padding_mask is not None:
@@ -87,7 +88,6 @@ class TransformerFeedForward(Model):
             tf.keras.regularizers.serialize(self.activity_regularizer),
         }
         return config
-
 
     @classmethod
     def from_config(cls, config):
