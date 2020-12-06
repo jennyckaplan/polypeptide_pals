@@ -119,3 +119,53 @@ def get_data(training_pickle, testing_pickle):
     ss_test_vec = np.array(convert_to_id(ss_vocab, padded_ss_test))
 
     return primary_train_vec, primary_test_vec, ss_train_vec, ss_test_vec, primary_vocab, ss_vocab, ss_pad_token_id
+
+
+def get_lstm_data(train_file, test_file):
+    """
+    Read and parse the train and test file line by line, then tokenize the sentences to build the train and test data separately.
+    Create a vocabulary dictionary that maps all the unique tokens from your train and test data as keys to a unique integer value.
+    Then vectorize your train and test data based on your vocabulary dictionary.
+
+    :param train_file: Path to the training file.
+    :param test_file: Path to the test file.
+    :return: Tuple of train (1-d list or array with training words in vectorized/id form), test (1-d list or array with testing words in vectorized/id form), vocabulary (Dict containg index->word mapping)
+    """
+    training_data = pickle.load(open(train_file, "rb"))
+    testing_data = pickle.load(open(test_file, "rb"))
+
+    training_primary = training_data[:, 1]
+    training_ss3 = training_data[:, 2]
+
+    testing_primary = testing_data[:, 1]
+    testing_ss3 = testing_data[:, 2]
+
+    # TODO: FINISH
+
+    # ensure that all words appearing in test also appear in train
+    # tokens = train_tokens.copy()
+    # tokens.extend(test_tokens)
+
+    # vocab = set(tokens)  # get all unique tokens
+    # vocab_dict = {w: i for i, w in enumerate(list(vocab))}
+
+    return None
+
+    # train_tokens = [vocab_dict[token] for token in train_tokens]
+    # test_tokens = [vocab_dict[token] for token in test_tokens]
+
+    # return (train_tokens, test_tokens, vocab_dict)
+
+
+def get_next_batch(inputs, labels, start, batch_size):
+    """
+    Helper function for batching
+    Returns a slice of inputs and slice of corresponding labels
+    :param inputs: NumPy inputs array
+    :param labels: NumPy labels array
+    :param start: starting index for the slice
+    :param batch_size: number of examples desired for the batch
+    :return: NumPy array of batched inputs and labels
+    """
+    end = start + batch_size
+    return (inputs[start:end], labels[start:end])
