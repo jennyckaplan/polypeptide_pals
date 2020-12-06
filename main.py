@@ -7,6 +7,9 @@ from rnn_model import RNN_Seq2Seq
 import sys
 import random
 
+from attenvis import AttentionVis
+av = AttentionVis()
+
 
 def train(model, train_primary, train_ss, ss_padding_index):
     """
@@ -41,6 +44,7 @@ def train(model, train_primary, train_ss, ss_padding_index):
             zip(gradients, model.trainable_variables))
 
 
+@av.test_func
 def test(model, test_primary, test_ss, ss_padding_index):
     """
     Runs through one epoch - all testing examples.
@@ -96,6 +100,9 @@ def main():
         print("<Model Type>: [RNN/TRANSFORMER]")
         exit()
 
+    if sys.argv[1] == "TRANSFORMER":
+        av.setup_visualization(enable=False)
+
     print("Running preprocessing...")
     primary_train, primary_test, ss_train, ss_test, primary_vocab, ss_vocab, ss_pad_tokenID = get_data(
         "train_secondary_structure.p", "valid_secondary_structure.p")
@@ -113,6 +120,10 @@ def main():
 
     print("start testing")
     test(model, primary_test, ss_test, ss_pad_tokenID)
+
+    # Visualize a sample attention matrix from the test set
+    # Only takes effect if you enabled visualizations above
+    # av.show_atten_heatmap()
 
 
 if __name__ == '__main__':
