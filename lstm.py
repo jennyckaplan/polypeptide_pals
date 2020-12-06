@@ -170,36 +170,29 @@ def generate_sentence(word1, length, vocab, model, sample_n=10):
 
 def main():
     # Pre-process and vectorize the data
-    # print("Begin preprocessing...")
-    # (train_tokens, test_tokens, vocab_dict) = get_lstm_data(
-    #     "train_secondary_structure.p", "valid_secondary_structure.p")
-    # print("Preprocessing complete.")
+    print("Begin preprocessing...")
+    (train_inputs, train_labels, test_inputs, test_labels, vocab_dict) = get_lstm_data(
+        "train_secondary_structure.p", "valid_secondary_structure.p")
+    print("Preprocessing complete.")
 
-    # # Separate train and test data into inputs and labels
-    # train_inputs = train_tokens[:-1]
-    # train_labels = train_tokens[1:]
+    # make train inputs/labels and test inputs/labels numpy arrays
+    train_inputs = np.array(train_inputs, dtype=np.int32)
+    train_labels = np.array(train_labels, dtype=np.int32)
+    test_inputs = np.array(test_inputs, dtype=np.int32)
+    test_labels = np.array(test_labels, dtype=np.int32)
 
-    # test_inputs = test_tokens[:-1]
-    # test_labels = test_tokens[1:]
+    # initialize model and tensorflow variables
+    model = Model(len(vocab_dict))
 
-    # # make train inputs/labels and test inputs/labels numpy arrays
-    # train_inputs = np.array(train_inputs, dtype=np.int32)
-    # train_labels = np.array(train_labels, dtype=np.int32)
-    # test_inputs = np.array(test_inputs, dtype=np.int32)
-    # test_labels = np.array(test_labels, dtype=np.int32)
+    print("training")
+    # Set-up the training step
+    train(model, train_inputs, train_labels)
 
-    # # initialize model and tensorflow variables
-    # model = Model(len(vocab_dict))
+    # Set up the testing steps
+    perplexity = test(model, test_inputs, test_labels)
 
-    # print("training")
-    # # Set-up the training step
-    # train(model, train_inputs, train_labels)
-
-    # # Set up the testing steps
-    # perplexity = test(model, test_inputs, test_labels)
-
-    # # Print out perplexity
-    # print("Perplexity: {}".format(perplexity))
+    # Print out perplexity
+    print("Perplexity: {}".format(perplexity))
 
 
 if __name__ == '__main__':
