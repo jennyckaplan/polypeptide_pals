@@ -18,7 +18,7 @@ class Transformer_Seq2Seq(tf.keras.Model):
         self.learning_rate = 1e-2
         self.optimizer = tf.keras.optimizers.Adam(self.learning_rate)
 
-        self.batch_size = 100
+        self.batch_size = 10
         self.embedding_size = 32
 
         # Define primary and ss embedding layers:
