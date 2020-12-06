@@ -8,12 +8,20 @@ This is a reimplementation of the paper [Evaluating Protein Transfer Learning wi
 
 ### Results
 
-Secondary Structure Prediction
+Secondary Structure Prediction (ss3)
 | Model       | Accuracy | Perplexity |
 | ----------- | :------: | ---------: |
 | RNN         |  0.8403  |      1.649 |
 | Transformer |          |            |
 | LSTM        |          |            |
+
+Secondary Structure Prediction (ss8)
+| Model       | Accuracy | Perplexity |
+| ----------- | :------: | ---------: |
+| RNN         |          |            |
+| Transformer |          |            |
+| LSTM        |          |            |
+
 
 ### Dependencies
 
