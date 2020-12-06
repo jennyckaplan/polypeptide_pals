@@ -4,7 +4,9 @@
 
 ### Overview
 
-This is a reimplementation of the paper [Evaluating Protein Transfer Learning with TAPE by Rao et al](https://arxiv.org/pdf/1906.08230.pdf). The GitHub for the paper with the model architectures implemented in PyTorch and data is [here](https://github.com/songlab-cal/tape). Due to time and resource constraints, we focused on reimplementing the downstream tasks, passing in the unsupervised pretrained model (trained on the very large Pfam protein family dataset) weights to these downstream models. We reimplemented multiple downstream models each trained for five biological tasks: Secondary Structure (SS) Prediction, ...... (TODO: add rest of the tasks after completing). The models we reimplemented were a Transformer model, ..... (TODO: add rest of models after completing).
+This is a reimplementation of the paper [Evaluating Protein Transfer Learning with TAPE by Rao et al](https://arxiv.org/pdf/1906.08230.pdf). The GitHub for the paper with the model architectures implemented in PyTorch and data is [here](https://github.com/songlab-cal/tape). Due to time and resource constraints, we focused on reimplementing the downstream tasks, conditionally passing in the unsupervised pretrained model (trained on the very large Pfam protein family dataset) weights to these downstream models. We reimplemented multiple downstream models each trained on five biological tasks: Secondary Structure (SS) Prediction, ...... (TODO: add rest of the tasks after completing). The models we reimplemented were a Transformer, RNN, and LSTM.
+
+### Results
 
 ### Dependencies
 
