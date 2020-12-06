@@ -151,7 +151,8 @@ class Transformer_Block(tf.keras.layers.Layer):
         :context: tensor of [BATCH_SIZE x WINDOW_SIZE x EMBEDDING_SIZE ] or None
                 default=None, This is context from the encoder to be used as Keys and Values in self-attention function
         """
-
+        with self.is_decoder:
+            atten_out = self.self_atten(inputs, inputs, inputs)
         atten_out += inputs
         atten_normalized = self.layer_norm(atten_out)
 
