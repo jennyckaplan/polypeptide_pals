@@ -8,6 +8,7 @@ This is a reimplementation of the paper [Evaluating Protein Transfer Learning wi
 
 ### Results
 
+Secondary Structure Prediction
 | Model       | Accuracy | Perplexity |
 | ----------- | :------: | ---------: |
 | RNN         |  0.8403  |      1.649 |
