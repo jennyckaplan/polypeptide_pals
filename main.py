@@ -1,81 +1,118 @@
+import os
 import tensorflow as tf
-import tensorflow.keras.backend as K
 import numpy as np
-import contextlib
-import argparse
-import pickle as pkl
-
-from typing import Optional
-from pathlib import Path
-
-from vocab import PFAM_VOCAB
-from transformer_model import Transformer
-from task_builder import TaskBuilder
-from secondary_structure import SecondaryStructureTask
+from preprocess import *
+from transformer_model import Transformer_Seq2Seq
+from rnn_model import RNN_Seq2Seq
+import sys
+import random
 
 
-def run_embed(datafile: str,
-              model_name: str,
-              load_from: str):
+def train(model, train_primary, train_ss, ss_padding_index):
+    """
+    Runs through one epoch - all training examples.
 
-    datapath = Path(datafile)
-    if not datapath.exists():
-        raise FileNotFoundError(datapath)
-    elif datapath.suffix not in ['.tfrecord']:
-        raise Exception(
-            f"Unknown file type: {datapath.suffix}, must be .tfrecord")
+    :param model: the initialized model to use for forward and backward pass
+    :param train_primary: primary (amino acid seq) train data (all data for training) of shape (num_sentences, window_size)
+    :param train_ss: secondary structure train data (all data for training) of shape (num_sentences, window_size)
+    :param ss_padding_index: the padding index, the id of *PAD* token. This integer is used when masking padding labels.
+    :return: None
+    """
+    num_examples = train_primary.shape[0]
+    num_batches = (int)(np.ceil(num_examples / model.batch_size))
 
-    load_path: Optional[Path] = None
-    if load_from is not None:
-        load_path = Path(load_from)
-        if not load_path.exists():
-            raise FileNotFoundError(load_path)
+    primary_batch = np.asarray(np.array_split(train_primary, num_batches))
+    ss_batch = np.asarray(np.array_split(train_ss, num_batches))
 
-    sess = tf.compat.v1.InteractiveSession()
-    K.set_learning_phase(0)
-    n_symbols = len(PFAM_VOCAB)
-    embedding_model = Transformer(n_symbols)
+    for i in range(num_batches):
+        curr_primary = primary_batch[i]
+        curr_SS = ss_batch[i]
+        ss_batch_inputs = curr_SS[:, 0:-1]
+        ss_batch_labels = curr_SS[:, 1:]
 
-    task = SecondaryStructureTask()
-    deserialization_func = task.deserialization_func
+        mask = np.where(ss_batch_labels == ss_padding_index, 0, 1)
+        with tf.GradientTape() as tape:
+            probs = model(curr_primary, ss_batch_inputs)
 
-    data = tf.data.TFRecordDataset(str(datapath)).map(deserialization_func)
-    data = data.batch(1)
-    print (data)
-    iterator = tf.compat.v1.data.make_one_shot_iterator(data)
-    batch = iterator.get_next()
-    output = embedding_model(batch)
-    if load_path is not None:
-        embedding_model.load_weights(str(load_path))
+            loss = model.loss_function(probs, ss_batch_labels, mask)
 
-    embeddings = []
-    with contextlib.suppress(tf.errors.OutOfRangeError):
-        while True:
-            output_batch = sess.run(output['encoder_output'])
-            for encoder_output in output_batch:
-                embeddings.append(encoder_output)
+        gradients = tape.gradient(loss, model.trainable_variables)
+        model.optimizer.apply_gradients(
+            zip(gradients, model.trainable_variables))
 
-    return embeddings
+
+def test(model, test_primary, test_ss, ss_padding_index):
+    """
+    Runs through one epoch - all testing examples.
+
+    :param model: the initialized model to use for forward and backward pass
+    :param test_primary: primary (amino acid seq) test data (all data for testing) of shape (num_proteins, window_size)
+    :param test_ss: secondary structure (ss) test data (all data for testing) of shape (num_proteins, window_size)
+    :param ss_padding_index: the padding index, the id of *PAD* token. This integer is used when masking padding labels.
+    :returns: a tuple containing at index 0 the perplexity of the test set and at index 1 the per symbol accuracy on test set,
+    e.g. (my_perplexity, my_accuracy)
+    """
+    num_examples = test_primary.shape[0]
+    num_batches = (int)(np.ceil(num_examples / model.batch_size))
+
+    primary_batch = np.asarray(np.array_split(test_primary, num_batches))
+    ss_batch = np.asarray(np.array_split(test_ss, num_batches))
+
+    losses = []
+    accuracies = []
+
+    sum_accuracy = 0
+    sum_loss = 0
+    total_tokens = 0
+    for i in range(num_batches):  # going thru all the batches
+        curr_primary = primary_batch[i]
+        curr_SS = ss_batch[i]
+        ss_batch_inputs = curr_SS[:, 0:-1]
+        ss_batch_labels = curr_SS[:, 1:]
+
+        probs = model(curr_primary, ss_batch_inputs)
+
+        mask = np.where(ss_batch_labels == ss_padding_index, 0, 1)
+
+        loss = model.loss_function(probs, ss_batch_labels, mask)
+        accuracy = model.accuracy_function(probs, ss_batch_labels, mask)
+
+        tokens = np.sum(mask)
+        total_tokens = total_tokens + tokens
+        sum_loss = sum_loss + loss
+        sum_accuracy = sum_accuracy + accuracy*tokens
+
+    perplexity = np.exp(sum_loss / total_tokens)
+    accuracy = (sum_accuracy + 0.0) / total_tokens
+
+    print("perplexity: " + str(perplexity))
+    print("accuracy: " + str(accuracy))
+    return perplexity, accuracy
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('datafile', type=str, help='sequences to embed')
-    parser.add_argument('model', type=str, help='which model to use')
-    parser.add_argument('--load-from', type=str, default=None,
-                        help='file from which to load pretrained weights')
-    parser.add_argument(
-        '--task', default=None,
-        help='If running a forward pass through existing task datasets, refer to the task with this flag')
-    parser.add_argument('--output', default='outputs.pkl',
-                        type=str, help='file to output results to')
-    args = parser.parse_args()
+    if len(sys.argv) != 2 or sys.argv[1] not in {"RNN", "TRANSFORMER"}:
+        print("USAGE: python assignment.py <Model Type>")
+        print("<Model Type>: [RNN/TRANSFORMER]")
+        exit()
 
-    embeddings = run_embed(args.datafile, args.model,
-                           args.load_from)
+    print("Running preprocessing...")
+    primary_train, primary_test, ss_train, ss_test, primary_vocab, ss_vocab, ss_pad_tokenID = get_data(
+        "train_secondary_structure.p", "valid_secondary_structure.p")
+    print("Preprocessing complete.")
 
-    with open(args.output, 'wb') as f:
-        pkl.dump(embeddings, f)
+    model_args = (WINDOW_SIZE, len(primary_vocab), len(ss_vocab))
+
+    if sys.argv[1] == "RNN":
+        model = RNN_Seq2Seq(*model_args)
+    elif sys.argv[1] == "TRANSFORMER":
+        model = Transformer_Seq2Seq(*model_args)
+
+    print("start training")
+    train(model, primary_train, ss_train, ss_pad_tokenID)
+
+    print("start testing")
+    test(model, primary_test, ss_test, ss_pad_tokenID)
 
 
 if __name__ == '__main__':

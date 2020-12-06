@@ -1,21 +1,27 @@
-#!/bin/bash
-
-#======================< DOWNLOAD SCRIPT >=====================#
-#                                                              #
-#   Pipeline script to download the relevent datasets.         #
-#                                                              #
-#               USAGE:    $ sh ./download_data.sh              #
-#                                                              #
-#==============================================================#
-
-# Create new directory for the data
 mkdir -p ./data
-cd data
-mkdir -p ./tf_records
-cd tf_records
-# Download the TFRecord data for the Secondary Structure task
-wget -c http://s3.amazonaws.com/proteindata/data/secondary_structure.tar.gz -O - | tar -xz
-cd ..
-mkdir -p ./h5
-cd h5
-wget http://s3.amazonaws.com/proteindata/pretrain_weights/bepler_unsupervised_pretrain_weights.h5
+
+# Download Vocab/Model files
+wget http://s3.amazonaws.com/proteindata/data_pytorch/pfam.model
+wget http://s3.amazonaws.com/proteindata/data_pytorch/pfam.vocab
+
+mv pfam.model data
+mv pfam.vocab data
+
+# Download Data Files
+wget http://s3.amazonaws.com/proteindata/data_pytorch/secondary_structure.tar.gz
+wget http://s3.amazonaws.com/proteindata/data_pytorch/proteinnet.tar.gz
+wget http://s3.amazonaws.com/proteindata/data_pytorch/remote_homology.tar.gz
+wget http://s3.amazonaws.com/proteindata/data_pytorch/fluorescence.tar.gz
+wget http://s3.amazonaws.com/proteindata/data_pytorch/stability.tar.gz
+
+tar -xzf secondary_structure.tar.gz -C ./data
+tar -xzf proteinnet.tar.gz -C ./data
+tar -xzf remote_homology.tar.gz -C ./data
+tar -xzf fluorescence.tar.gz -C ./data
+tar -xzf stability.tar.gz -C ./data
+
+rm secondary_structure.tar.gz
+rm proteinnet.tar.gz
+rm remote_homology.tar.gz
+rm fluorescence.tar.gz
+rm stability.tar.gz
