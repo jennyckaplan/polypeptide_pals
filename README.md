@@ -8,6 +8,12 @@ This is a reimplementation of the paper [Evaluating Protein Transfer Learning wi
 
 ### Results
 
+| Model       | Accuracy | Perplexity |
+| ----------- | :------: | ---------: |
+| RNN         |  0.8403  |      1.649 |
+| Transformer |          |            |
+| LSTM        |          |            |
+
 ### Dependencies
 
 - wget (for MacOS: run `brew install wget`)
@@ -16,7 +22,11 @@ This is a reimplementation of the paper [Evaluating Protein Transfer Learning wi
 
 ### Data
 
-To download the dataset, run `download_data.sh`. This should create a /data folder in the root directory that contains two folders for the different types of data: TFRecord and raw JSON. This dataset is for the Secondary Structure task only.
+To download the dataset, run `download_data.sh`. This should create a /data folder in the root directory that contains the data for each task. This dataset is for the Secondary Structure task only.
+
+### Running
+
+`python3 main.py <model>` where model is "RNN", "TRANSFORMER" or "LSTM"
 
 ### Public Implementations
 

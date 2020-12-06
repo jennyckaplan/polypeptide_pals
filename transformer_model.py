@@ -1,140 +1,101 @@
-from typing import Optional, Tuple, List
-
 import numpy as np
-
 import tensorflow as tf
-from tensorflow.keras import Model
-from transformer_input_embedding import TransformerInputEmbedding
-from transformer_encoder import TransformerEncoder
+import transformer_funcs as transformer
 
 
-class Transformer(Model):
+class Transformer_Seq2Seq(tf.keras.Model):
+    def __init__(self, window_size, primary_vocab_size, ss_vocab_size):
+        super(Transformer_Seq2Seq, self).__init__()
 
-    def __init__(self,
-                 n_symbols: int,
-                 n_layers: int = 12,
-                 n_heads: int = 8,
-                 d_model: int = 512,
-                 d_filter: int = 2048,
-                 dropout: Optional[float] = 0.1,
-                 layer_dropout: Optional[float] = None,
-                 kernel_regularizer: Optional[str] = None) -> None:
-        super().__init__()
-        self.n_layers = n_layers
-        self.n_heads = n_heads
-        self.d_model = d_model
-        self.d_filter = d_filter
-        self.kernel_regularizer = kernel_regularizer
-        self.dropout = dropout
+        self.primary_vocab_size = primary_vocab_size  # The size of the primary vocab
+        self.ss_vocab_size = ss_vocab_size  # The size of the ss vocab
 
-        input_embedding = TransformerInputEmbedding(
-            d_model, discrete=True, n_symbols=n_symbols, dropout=dropout,
-            concat_position_encoding=True, reproject_position_encoding=True)
+        self.window_size = window_size  # The window size
 
-        self.encoder = TransformerEncoder(
-            input_embedding, n_layers, n_heads, d_model, d_filter, dropout, layer_dropout)
+        self.learning_rate = 1e-2
+        self.optimizer = tf.keras.optimizers.Adam(self.learning_rate)
 
-    def convert_sequence_mask_to_attention_mask(self, sequence, sequence_mask):
-        """Given a padded input tensor of sequences and a boolean mask for each position
-        in the sequence, returns a 3D boolean mask for use in attention.
-         Args:
-        sequence (tf.Tensor): Tensor of shape [batch_size, sequence_length_1, ndim]
-          padding_mask (tf.Tensor[bool]): Tensor of shape [batch_size, sequence_length_2]
-        Returns:
-            tf.Tensor[bool]: Tensor of shape [batch_size, sequence_length_1, sequence_length_2]
+        self.batch_size = 100
+        self.embedding_size = 32
+
+        # Define primary and ss embedding layers:
+        self.E_primary = tf.Variable(tf.random.normal(
+            [self.primary_vocab_size, self.embedding_size], stddev=.1))
+        self.E_ss = tf.Variable(tf.random.normal(
+            [self.ss_vocab_size, self.embedding_size], stddev=.1))
+
+        # Create positional encoder layers
+        self.pos_encoder_primary = transformer.Position_Encoding_Layer(
+            self.window_size, self.embedding_size)
+        self.pos_encoder_ss = transformer.Position_Encoding_Layer(
+            self.window_size, self.embedding_size)
+
+        # Define encoder and decoder layers:
+        self.encoder_1 = transformer.Transformer_Block(
+            self.embedding_size, False)
+        self.decoder_1 = transformer.Transformer_Block(
+            self.embedding_size, True)
+        self.decoder_2 = transformer.Transformer_Block(
+            self.embedding_size, True)
+
+        # Define dense layer(s)
+        self.dense = tf.keras.layers.Dense(
+            self.ss_vocab_size, activation='softmax')
+
+    @tf.function
+    def call(self, encoder_input, decoder_input):
         """
-        batch_assert = tf.assert_equal(tf.shape(sequence_mask)[0], tf.shape(sequence)[0],
-                                       message='batch size mismatch between input sequence and  \
-                                            sequence_mask')
-        rank_assert = tf.assert_equal(tf.rank(sequence_mask), 2,
-                                      message='Can only convert 2D position mask to 3D attention mask')
-
-        with tf.control_dependencies([batch_assert, rank_assert]):
-            attention_mask = tf.tile(
-                sequence_mask[:, None, :], (1, tf.shape(sequence)[1], 1))
-
-            return attention_mask
-
-    def convert_sequence_length_to_sequence_mask(self, sequence, sequence_lengths):
-        """Given a padded input tensor of sequences and a tensor of lengths, returns
-        a boolean mask for each position in the sequence indicating whether or not
-        that position is padding.
-        Args:
-            sequence (tf.Tensor): Tensor of shape [batch_size, sequence_length, ndim]
-            sequence_lengths (tf.Tensor[int]): Tensor of shape [batch_size]
-        Returns:
-            tf.Tensor[bool]: Tensor of shape [batch_size, sequence_length]
+        :param encoder_input: batched ids corresponding to primary (amino acid seqs)
+        :param decoder_input: batched ids corresponding to ss
+        :return prbs: The 3d probabilities as a tensor, [batch_size x window_size x ss_vocab_size]
         """
-        batch_assert = tf.assert_equal(tf.shape(sequence_lengths)[0], tf.shape(sequence)[0],
-                                       message='batch size mismatch between input sequence and  \
-                                            sequence_lengths')
-        rank_assert = tf.assert_equal(tf.rank(sequence_lengths), 1,
-                                      message='Can only convert 1D sequence_lengths to 2D mask')
+        # Adds the positional embeddings to primary seq (ammino acid seq)
+        primary_embeddings = tf.nn.embedding_lookup(
+            self.E_primary, encoder_input)
+        primary_embeddings = self.pos_encoder_primary(primary_embeddings)
 
-        dtype = sequence_lengths.dtype
-        with tf.control_dependencies([batch_assert, rank_assert]):
-            array_shape = tf.shape(sequence, out_type=dtype)
-            batch_size = array_shape[0]
-            seqlen = array_shape[1]
+        # Passes the primary seq (amino acid seq) embeddings to the encoder
+        encoder_output = self.encoder_1(primary_embeddings)
 
-            indices = tf.tile(tf.range(seqlen, dtype=dtype)
-                              [None, :], (batch_size, 1))
-            mask = indices < sequence_lengths[:, None]
+        # Adds positional embeddings to the secondary structure (ss) embeddings
+        ss_embeddings = tf.nn.embedding_lookup(self.E_ss, decoder_input)
+        ss_embeddings = self.pos_encoder_ss(ss_embeddings)
 
-            return mask
+        # Passes the secondary structure (ss) embeddings and output of your encoder, to the decoder
+        decoder_output_1 = self.decoder_1(ss_embeddings, encoder_output)
+        decoder_output_2 = self.decoder_2(decoder_output_1, encoder_output)
 
-    def convert_to_attention_mask(self, sequence, mask):
-        """Given a padded input tensor of sequences and a tensor of lengths, returns
-        a boolean mask for each position in the sequence indicating whether or not
-        that position is padding.
-        Args:
-            sequence (tf.Tensor): Tensor of shape [batch_size, sequence_length, ndim]
-            sequence_lengths (tf.Tensor[int]): Tensor of shape [batch_size]
-        Returns:
-            tf.Tensor[bool]: Tensor of shape [batch_size, sequence_length]
+        probs = self.dense(decoder_output_2)
+
+        return probs
+
+    def accuracy_function(self, prbs, labels, mask):
         """
-        if mask is None:
-            return None
-        if len(mask.shape) == 1:
-            mask = self.convert_sequence_length_to_sequence_mask(
-                sequence, mask)
-        if len(mask.shape) == 2:
-            mask = self.convert_sequence_mask_to_attention_mask(
-                sequence, mask)
-        if mask.dtype != tf.bool:
-            mask = tf.cast(mask, tf.bool)
-        return mask
+        Computes the batch accuracy
 
-    def call(self, inputs):
-        """
-        Args:
-            sequence: tf.Tensor[int32] - Amino acid sequence,
-                a padded tensor with shape [batch_size, MAX_PROTEIN_LENGTH]
-            protein_length: tf.Tensor[int32] - Length of each protein in the sequence, a tensor with shape [batch_size]
-        Output:
-            encoder_output: tf.Tensor[float32] - embedding of each amino acid
-                a tensor with shape [batch_size, MAX_PROTEIN_LENGTH, d_model]
+        :param prbs:  float tensor, word prediction probabilities [batch_size x window_size x ss_vocab_size]
+        :param labels:  integer tensor, word prediction labels [batch_size x window_size]
+        :param mask:  tensor that acts as a padding mask [batch_size x window_size]
+        :return: scalar tensor of accuracy of the batch between 0 and 1
         """
 
-        sequence = inputs['primary']
-        protein_length = inputs['protein_length']
+        decoded_symbols = tf.argmax(input=prbs, axis=2)
+        accuracy = tf.reduce_mean(tf.boolean_mask(
+            tf.cast(tf.equal(decoded_symbols, labels), dtype=tf.float32), mask))
+        return accuracy
 
-        attention_mask = self.convert_to_attention_mask(
-            sequence, protein_length)
+    def loss_function(self, prbs, labels, mask):
+        """
+        Calculates the model cross-entropy loss after one forward pass
 
-        encoder_output = self.encoder(sequence, mask=attention_mask)
-        inputs['encoder_output'] = encoder_output
-        return inputs
+        :param prbs:  float tensor, word prediction probabilities [batch_size x window_size x ss_vocab_size]
+        :param labels:  integer tensor, word prediction labels [batch_size x window_size]
+        :param mask:  tensor that acts as a padding mask [batch_size x window_size]
+        :return: the loss of the model as a tensor
+        """
+        loss = tf.reduce_sum(tf.keras.losses.sparse_categorical_crossentropy(
+            labels, prbs)*mask)
+        return loss
 
-    def get_optimal_batch_sizes(self) -> Tuple[List[int], List[int]]:
-        bucket_sizes = np.array(
-            [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
-             1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 2000])
-        batch_sizes = np.array(
-            [4, 3, 2, 1.5, 1, 0.9, 0.9, 0.8, 0.65, 0.6,
-             0.5, 0.5, 0.4, 0.3, 0.3, 0.2, 0.2, 0.1, 0, 0])
-
-        batch_sizes = np.asarray(batch_sizes, np.int32)
-        batch_sizes[batch_sizes <= 0] = 1
-
-        return bucket_sizes, batch_sizes
+    def __call__(self, *args, **kwargs):
+        return super(Transformer_Seq2Seq, self).__call__(*args, **kwargs)
