@@ -3,6 +3,9 @@ import tensorflow as tf
 import numpy as np
 import pickle
 
+from attenvis import AttentionVis
+av = AttentionVis()
+
 PAD_TOKEN = "*PAD*"
 STOP_TOKEN = "*STOP*"
 START_TOKEN = "*START*"
@@ -94,6 +97,7 @@ def convert_to_id(vocab, sentences):
     return np.stack([[vocab[word] if word in vocab else vocab[UNK_TOKEN] for word in sentence] for sentence in sentences])
 
 
+@av.get_data_func
 def get_data(training_pickle, testing_pickle):
     """
     Reads and parses training and test data, then pad the corpus.

@@ -2,6 +2,9 @@ import numpy as np
 import tensorflow as tf
 import transformer_funcs as transformer
 
+from attenvis import AttentionVis
+av = AttentionVis()
+
 
 class Transformer_Seq2Seq(tf.keras.Model):
     def __init__(self, window_size, primary_vocab_size, ss_vocab_size):
@@ -97,5 +100,6 @@ class Transformer_Seq2Seq(tf.keras.Model):
             labels, prbs)*mask)
         return loss
 
+    @av.call_func
     def __call__(self, *args, **kwargs):
         return super(Transformer_Seq2Seq, self).__call__(*args, **kwargs)
