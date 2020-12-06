@@ -37,6 +37,33 @@ def pad_corpus(primary, secondary_structure):
     return np.array(primary_padded_lines), np.array(ss_padded_lines)
 
 
+def get_sequences(primary, secondary_structure):
+    """
+    Arguments are lists of primary, secondary_structure sequences/labels. The
+    text is given an initial "*STOP*".  All sentences are padded with "*STOP*" at
+    the end.
+
+    :param primary: list of primary sequences
+    :param english: list of secondary structure sequences
+    :return: A tuple of: (list of padded sequences for ss, list of padded sequences for primary)
+    """
+    primary_lines = []
+    for line in primary:
+        padded_primary_item = line[:WINDOW_SIZE]
+        padded_primary_item += [PAD_TOKEN] * \
+            (WINDOW_SIZE - len(padded_primary_item) - 1)
+        primary_lines.append(padded_primary_item)
+
+    ss_lines = []
+    for line in secondary_structure:
+        padded_ss_item = line[:WINDOW_SIZE]
+        padded_ss_item += [PAD_TOKEN] * \
+            (WINDOW_SIZE - len(padded_ss_item) - 1)
+        ss_lines.append(padded_ss_item)
+
+    return np.array(primary_lines), np.array(ss_lines)
+
+
 def build_vocab(sentences):
     """
 
@@ -47,8 +74,9 @@ def build_vocab(sentences):
     """
     tokens = []
     for s in sentences:
-        tokens.extend(s)
-    all_tokens = sorted(list(set([STOP_TOKEN, PAD_TOKEN, UNK_TOKEN] + tokens)))
+        tokens.extend(str(s))
+    all_tokens = sorted(
+        list(set([STOP_TOKEN, PAD_TOKEN, UNK_TOKEN] + tokens)))
 
     vocab = {token: i for i, token in enumerate(all_tokens)}
 
@@ -140,21 +168,31 @@ def get_lstm_data(train_file, test_file):
     testing_primary = testing_data[:, 1]
     testing_ss3 = testing_data[:, 2]
 
-    # TODO: FINISH
+    primary_train, ss_train = get_sequences(
+        training_primary, training_ss3)
 
-    # ensure that all words appearing in test also appear in train
-    # tokens = train_tokens.copy()
-    # tokens.extend(test_tokens)
+    primary_test, ss_test = get_sequences(
+        testing_primary, testing_ss3)
 
-    # vocab = set(tokens)  # get all unique tokens
-    # vocab_dict = {w: i for i, w in enumerate(list(vocab))}
+    # Build vocab
+    tokens = np.concatenate((primary_train, ss_train))
+    tokens = np.concatenate((tokens, primary_test))
+    tokens = np.concatenate((tokens, ss_test))
+    vocab, _ = build_vocab(tokens)
 
-    return None
+    train_inputs = np.array(convert_to_id(
+        vocab, primary_train))
+    train_labels = np.array(convert_to_id(
+        vocab, ss_train))
 
-    # train_tokens = [vocab_dict[token] for token in train_tokens]
-    # test_tokens = [vocab_dict[token] for token in test_tokens]
+    test_inputs = np.array(convert_to_id(
+        vocab, primary_test))
+    test_labels = np.array(convert_to_id(
+        vocab, ss_test))
 
-    # return (train_tokens, test_tokens, vocab_dict)
+    # TODO: THESE SHOULD BE OF SHAPE (num_examples,) instead of (num_examples,WINDOW_SIZE)
+
+    return (train_inputs, train_labels, test_inputs, test_labels, vocab)
 
 
 def get_next_batch(inputs, labels, start, batch_size):
