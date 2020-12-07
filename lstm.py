@@ -125,6 +125,7 @@ def test(model, test_inputs, test_labels):
 
     input_groups = np.array(input_groups)
     label_groups = np.array(label_groups)
+    batch_accuracies = 0
 
     for i in range(0, num_windows, model.batch_size):
         (inputs_batch, labels_batch) = get_next_batch(
@@ -133,9 +134,17 @@ def test(model, test_inputs, test_labels):
         loss = model.loss(probs, labels_batch)
         batch_losses += loss
 
+        predicted_labels = tf.argmax(input=probs, axis=2)
+        accuracy = tf.reduce_mean(
+            tf.cast(tf.equal(predicted_labels, labels_batch), dtype=tf.float32))
+        batch_accuracies += accuracy
+
     num_batches = num_windows // model.batch_size
     average_loss = batch_losses / num_batches
-    return np.exp(np.mean(average_loss))
+    perplexity = np.exp(np.mean(average_loss))
+    accuracy = batch_accuracies / num_batches
+
+    return perplexity, accuracy
 
 
 def generate_sentence(word1, length, vocab, model, sample_n=10):
@@ -188,11 +197,14 @@ def main():
     # Set-up the training step
     train(model, train_inputs, train_labels)
 
+    print("testing")
     # Set up the testing steps
-    perplexity = test(model, test_inputs, test_labels)
+    perplexity, accuracy = test(model, test_inputs, test_labels)
 
     # Print out perplexity
     print("Perplexity: {}".format(perplexity))
+    # Print accuracy
+    print("Accuracy: {}".format(accuracy))
 
 
 if __name__ == '__main__':
