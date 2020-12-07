@@ -12,15 +12,15 @@ Secondary Structure Prediction (ss3)
 | Model       | Accuracy | Perplexity |
 | ----------- | :------: | ---------: |
 | RNN         |  0.8403  |      1.649 |
-| Transformer |          |            |
-| LSTM        |          |            |
+| Transformer |  0.8402  |      1.653 |
+| LSTM        |  0.6325  |      5.246 |
 
 Secondary Structure Prediction (ss8)
 | Model       | Accuracy | Perplexity |
 | ----------- | :------: | ---------: |
-| RNN         |          |            |
-| Transformer |          |            |
-| LSTM        |          |            |
+| RNN         |  0.7474  |      2.241 |
+| Transformer |  0.7275  |      2.377 |
+| LSTM        |  0.2959  |     12.707 |
 
 
 ### Dependencies
