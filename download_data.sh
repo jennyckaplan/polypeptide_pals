@@ -25,3 +25,11 @@ rm proteinnet.tar.gz
 rm remote_homology.tar.gz
 rm fluorescence.tar.gz
 rm stability.tar.gz
+
+cd data
+cd json	
+wget -c http://s3.amazonaws.com/proteindata/data_raw/secondary_structure.tar.gz -O - | tar -xz
+wget -c http://s3.amazonaws.com/proteindata/data_raw/proteinnet.tar.gz -O - | tar -xz
+wget -c http://s3.amazonaws.com/proteindata/data_raw/remote_homology.tar.gz -O - | tar -xz
+wget -c http://s3.amazonaws.com/proteindata/data_raw/fluorescence.tar.gz -O - | tar -xz
+wget -c http://s3.amazonaws.com/proteindata/data_raw/stability.tar.gz -O - | tar -xz
