@@ -40,33 +40,6 @@ def pad_corpus(primary, secondary_structure):
     return np.array(primary_padded_lines), np.array(ss_padded_lines)
 
 
-def get_sequences(primary, secondary_structure):
-    """
-    Arguments are lists of primary, secondary_structure sequences/labels. The
-    text is given an initial "*STOP*".  All sentences are padded with "*STOP*" at
-    the end.
-
-    :param primary: list of primary sequences
-    :param english: list of secondary structure sequences
-    :return: A tuple of: (list of padded sequences for ss, list of padded sequences for primary)
-    """
-    primary_lines = []
-    for line in primary:
-        padded_primary_item = line[:WINDOW_SIZE]
-        padded_primary_item += [PAD_TOKEN] * \
-            (WINDOW_SIZE - len(padded_primary_item) - 1)
-        primary_lines.append(padded_primary_item)
-
-    ss_lines = []
-    for line in secondary_structure:
-        padded_ss_item = line[:WINDOW_SIZE]
-        padded_ss_item += [PAD_TOKEN] * \
-            (WINDOW_SIZE - len(padded_ss_item) - 1)
-        ss_lines.append(padded_ss_item)
-
-    return np.array(primary_lines), np.array(ss_lines)
-
-
 def build_vocab(sentences):
     """
 
@@ -84,6 +57,21 @@ def build_vocab(sentences):
     vocab = {token: i for i, token in enumerate(all_tokens)}
 
     return vocab, vocab[PAD_TOKEN]
+
+
+def build_lstm_vocab(tokens):
+    """
+
+    Builds vocab from list of sequences
+
+    :param sentences:  list of sequences, each a list of tokens
+    :return: tuple of (dictionary: word --> unique index, pad_token_idx)
+    """
+    all_tokens = list(set(tokens))
+
+    vocab = {token: i for i, token in enumerate(all_tokens)}
+
+    return vocab
 
 
 def convert_to_id(vocab, sentences):
@@ -172,29 +160,23 @@ def get_lstm_data(train_file, test_file):
     testing_primary = testing_data[:, 1]
     testing_ss3 = testing_data[:, 2]
 
-    primary_train, ss_train = get_sequences(
-        training_primary, training_ss3)
-
-    primary_test, ss_test = get_sequences(
-        testing_primary, testing_ss3)
-
     # Build vocab
-    tokens = np.concatenate((primary_train, ss_train))
-    tokens = np.concatenate((tokens, primary_test))
-    tokens = np.concatenate((tokens, ss_test))
-    vocab, _ = build_vocab(tokens)
+    def flatten(t): return [item for sublist in t for item in sublist]
+    training_primary = flatten(training_primary)
+    training_ss3 = flatten(training_ss3)
+    testing_primary = flatten(testing_primary)
+    testing_ss3 = flatten(testing_ss3)
 
-    train_inputs = np.array(convert_to_id(
-        vocab, primary_train))
-    train_labels = np.array(convert_to_id(
-        vocab, ss_train))
+    tokens = np.concatenate((training_primary, training_ss3))
+    tokens = np.concatenate((tokens, testing_primary))
+    tokens = np.concatenate((tokens, testing_ss3))
+    vocab = build_lstm_vocab(tokens)
 
-    test_inputs = np.array(convert_to_id(
-        vocab, primary_test))
-    test_labels = np.array(convert_to_id(
-        vocab, ss_test))
+    train_inputs = np.array([vocab[token] for token in training_primary])
+    train_labels = np.array([vocab[token] for token in training_ss3])
 
-    # TODO: THESE SHOULD BE OF SHAPE (num_examples,) instead of (num_examples,WINDOW_SIZE)
+    test_inputs = np.array([vocab[token] for token in testing_primary])
+    test_labels = np.array([vocab[token] for token in testing_ss3])
 
     return (train_inputs, train_labels, test_inputs, test_labels, vocab)
 
