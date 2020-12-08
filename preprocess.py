@@ -86,7 +86,7 @@ def convert_to_id(vocab, sentences):
 
 
 @av.get_data_func
-def get_data(training_pickle, testing_pickle):
+def get_data(training_pickle, testing_pickle, data_idx : int):
     """
     Reads and parses training and test data, then pad the corpus.
     Then vectorize your train and test data based on your vocabulary dictionaries.
@@ -109,10 +109,10 @@ def get_data(training_pickle, testing_pickle):
     testing_data = pickle.load(open(testing_pickle, "rb"))
 
     training_primary = training_data[:, 1]
-    training_ss3 = training_data[:, 2]
+    training_ss3 = training_data[:, data_idx]
 
     testing_primary = testing_data[:, 1]
-    testing_ss3 = testing_data[:, 2]
+    testing_ss3 = testing_data[:, data_idx]
 
     # Pad training data
     padded_primary_train, padded_ss_train = pad_corpus(
@@ -141,7 +141,7 @@ def get_data(training_pickle, testing_pickle):
     return primary_train_vec, primary_test_vec, ss_train_vec, ss_test_vec, primary_vocab, ss_vocab, ss_pad_token_id
 
 
-def get_lstm_data(train_file, test_file):
+def get_lstm_data(train_file, test_file, data_idx : int):
     """
     Read and parse the train and test file line by line, then tokenize the sentences to build the train and test data separately.
     Create a vocabulary dictionary that maps all the unique tokens from your train and test data as keys to a unique integer value.
@@ -155,10 +155,10 @@ def get_lstm_data(train_file, test_file):
     testing_data = pickle.load(open(test_file, "rb"))
 
     training_primary = training_data[:, 1]
-    training_ss3 = training_data[:, 2]
+    training_ss3 = training_data[:, data_idx]
 
     testing_primary = testing_data[:, 1]
-    testing_ss3 = testing_data[:, 2]
+    testing_ss3 = testing_data[:, data_idx]
 
     # Build vocab
     def flatten(t): return [item for sublist in t for item in sublist]
