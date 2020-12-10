@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.keras import Model
 from preprocess import get_lstm_data, get_next_batch
+import sys
 
 
 class Model(tf.keras.Model):
@@ -39,7 +40,7 @@ class Model(tf.keras.Model):
         :param inputs: token ids of shape (batch_size, window_size)
         :param initial_state: 2-d array of shape (batch_size, rnn_size) as a tensor
         :return: the batch element probabilities as a tensor, a final_state
-        The final_state will be the last two RNN outputs, and we only need to 
+        The final_state will be the last two RNN outputs, and we only need to
         use the initial state during generation
         """
         embedding = tf.nn.embedding_lookup(self.E, inputs)
@@ -178,10 +179,19 @@ def generate_sentence(word1, length, vocab, model, sample_n=10):
 
 
 def main():
+    if len(sys.argv) != 3 or sys.argv[1] not in {"ss3", "ss8"} or sys.argv[2] not in {"valid", "casp12", "cb513", "ts115"}:
+        print("USAGE: python lstm.py <Data Type> <Dataset>")
+        print("<Model Type>: [RNN/TRANSFORMER/LSTM/GRU]")
+        print("<Data Type>: [ss3/ss8]")
+        print("<Dataset>: [valid, casp12, cb513, ts115]")
+        exit()
+
+    data_types = {'ss3': 2, 'ss8': 3}
+    data_index = data_types[sys.argv[2]]
     # Pre-process and vectorize the data
     print("Begin preprocessing...")
     (train_inputs, train_labels, test_inputs, test_labels, vocab_dict) = get_lstm_data(
-        "data/pickle/secondary_structure_train.p", "data/pickle/secondary_structure_valid.p")
+        "data/pickle/secondary_structure_train.p", "data/pickle/secondary_structure_" + sys.argv[2] + ".p", data_index)
     print("Preprocessing complete.")
 
     # make train inputs/labels and test inputs/labels numpy arrays
