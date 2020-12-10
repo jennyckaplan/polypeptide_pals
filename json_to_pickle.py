@@ -5,7 +5,7 @@ import pickle
 
 
 def json_to_arr(datafile_to_json):
-    with open(datafile_to_json) as f:
+    with open("data/secondary_structure/" + datafile_to_json + ".json") as f:
         data = json.load(f)
 
     data_arr = []
@@ -25,7 +25,13 @@ def json_to_arr(datafile_to_json):
     print(type(data_arr))
 
     # now pickle the data array!
-    pickle.dump(data_arr, open("valid_secondary_structure.p", "wb"))
+    pickle.dump(data_arr, open(
+        "data/pickle/" + datafile_to_json + ".p", "wb"))
 
 
-json_to_arr('data/secondary_structure_valid.json')
+if __name__ == '__main__':
+    json_to_arr('secondary_structure_train')
+    json_to_arr('secondary_structure_valid')
+    json_to_arr('secondary_structure_cb513')
+    json_to_arr('secondary_structure_ts115')
+    json_to_arr('secondary_structure_casp12')
