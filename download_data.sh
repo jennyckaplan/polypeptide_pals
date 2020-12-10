@@ -7,29 +7,12 @@ wget http://s3.amazonaws.com/proteindata/data_pytorch/pfam.vocab
 mv pfam.model data
 mv pfam.vocab data
 
-# Download Data Files
-wget http://s3.amazonaws.com/proteindata/data_pytorch/secondary_structure.tar.gz
-wget http://s3.amazonaws.com/proteindata/data_pytorch/proteinnet.tar.gz
-wget http://s3.amazonaws.com/proteindata/data_pytorch/remote_homology.tar.gz
-wget http://s3.amazonaws.com/proteindata/data_pytorch/fluorescence.tar.gz
-wget http://s3.amazonaws.com/proteindata/data_pytorch/stability.tar.gz
-
-tar -xzf secondary_structure.tar.gz -C ./data
-tar -xzf proteinnet.tar.gz -C ./data
-tar -xzf remote_homology.tar.gz -C ./data
-tar -xzf fluorescence.tar.gz -C ./data
-tar -xzf stability.tar.gz -C ./data
-
-rm secondary_structure.tar.gz
-rm proteinnet.tar.gz
-rm remote_homology.tar.gz
-rm fluorescence.tar.gz
-rm stability.tar.gz
-
 cd data
-cd json	
 wget -c http://s3.amazonaws.com/proteindata/data_raw/secondary_structure.tar.gz -O - | tar -xz
-wget -c http://s3.amazonaws.com/proteindata/data_raw/proteinnet.tar.gz -O - | tar -xz
-wget -c http://s3.amazonaws.com/proteindata/data_raw/remote_homology.tar.gz -O - | tar -xz
-wget -c http://s3.amazonaws.com/proteindata/data_raw/fluorescence.tar.gz -O - | tar -xz
-wget -c http://s3.amazonaws.com/proteindata/data_raw/stability.tar.gz -O - | tar -xz
+# JSON for other tasks
+# wget -c http://s3.amazonaws.com/proteindata/data_raw/proteinnet.tar.gz -O - | tar -xz
+# wget -c http://s3.amazonaws.com/proteindata/data_raw/remote_homology.tar.gz -O - | tar -xz
+# wget -c http://s3.amazonaws.com/proteindata/data_raw/fluorescence.tar.gz -O - | tar -xz
+# wget -c http://s3.amazonaws.com/proteindata/data_raw/stability.tar.gz -O - | tar -xz
+
+mkdir -p ./pickle
