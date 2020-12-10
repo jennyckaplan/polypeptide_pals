@@ -4,7 +4,7 @@
 
 ### Overview
 
-This is a reimplementation of the paper [Evaluating Protein Transfer Learning with TAPE by Rao et al](https://arxiv.org/pdf/1906.08230.pdf). The GitHub for the paper with the model architectures implemented in PyTorch and data is [here](https://github.com/songlab-cal/tape). Due to time and resource constraints, we focused on reimplementing the downstream tasks, conditionally passing in the unsupervised pretrained model (trained on the very large Pfam protein family dataset) weights to these downstream models. We reimplemented multiple downstream models each trained on five biological tasks: Secondary Structure (SS) Prediction, ...... (TODO: add rest of the tasks after completing). The models we reimplemented were a Transformer, RNN, and LSTM.
+This is a reimplementation of the paper [Evaluating Protein Transfer Learning with TAPE by Rao et al](https://arxiv.org/pdf/1906.08230.pdf). The GitHub for the paper with the model architectures implemented in PyTorch and data is [here](https://github.com/songlab-cal/tape). Due to time and resource constraints, we focused on reimplementing the downstream tasks, conditionally passing in the unsupervised pretrained model (trained on the very large Pfam protein family dataset) weights to these downstream models. We reimplemented multiple downstream models each trained on the biological task of Secondary Structure (SS) Prediction. The models we reimplemented were a Transformer, RNN, and LSTM.
 
 ### Results
 
@@ -32,6 +32,8 @@ Secondary Structure Prediction (ss8)
 ### Data
 
 To download the dataset, run `download_data.sh`. This should create a /data folder in the root directory that contains the data for each task. This dataset is for the Secondary Structure task only.
+
+Then, run `python3 json_to_pickle.py` to create the pickle files in `data/pickle/` with the relevant data for training, validation, and testing.
 
 ### Running
 

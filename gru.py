@@ -200,7 +200,7 @@ def main():
     # Pre-process and vectorize the data
     print("Begin preprocessing...")
     (train_inputs, train_labels, test_inputs, test_labels, vocab_dict) = get_lstm_data(
-        "train_secondary_structure.p", "valid_secondary_structure.p")
+        "data/pickle/secondary_structure_train.p", "data/pickle/secondary_structure_valid.p")
     print("Preprocessing complete.")
 
     # make train inputs/labels and test inputs/labels numpy arrays

@@ -96,20 +96,20 @@ def test(model, test_primary, test_ss, ss_padding_index):
 
 def main():
     if len(sys.argv) != 3 or sys.argv[1] not in {"RNN", "TRANSFORMER", "LSTM", "GRU"}:
-        print("USAGE: python assignment.py <Model Type> <Data Type>")
+        print("USAGE: python main.py <Model Type> <Data Type>")
         print("<Model Type>: [RNN/TRANSFORMER/LSTM/GRU]")
         print("<Data Type>: [ss3/ss8]")
         exit()
 
     if sys.argv[1] == "TRANSFORMER":
         av.setup_visualization(enable=False)
-        
-    data_types = {'ss3' : 2, 'ss8' : 3}
-    data_index = data_types[argv[2]]
+
+    data_types = {'ss3': 2, 'ss8': 3}
+    data_index = data_types[sys.argv[2]]
 
     print("Running preprocessing...")
     primary_train, primary_test, ss_train, ss_test, primary_vocab, ss_vocab, ss_pad_tokenID = get_data(
-        "train_secondary_structure.p", "valid_secondary_structure.p", data_index)
+        "data/pickle/secondary_structure_train.p", "data/pickle/secondary_structure_valid.p", data_index)
     print("Preprocessing complete.")
 
     model_args = (WINDOW_SIZE, len(primary_vocab), len(ss_vocab))
