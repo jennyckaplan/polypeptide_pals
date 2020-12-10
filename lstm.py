@@ -187,7 +187,7 @@ def main():
         exit()
 
     data_types = {'ss3': 2, 'ss8': 3}
-    data_index = data_types[sys.argv[2]]
+    data_index = data_types[sys.argv[1]]
     # Pre-process and vectorize the data
     print("Begin preprocessing...")
     (train_inputs, train_labels, test_inputs, test_labels, vocab_dict) = get_lstm_data(
