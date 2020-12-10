@@ -6,7 +6,7 @@ import sys
 
 
 class Model(tf.keras.Model):
-    def __init__(self, vocab_size):
+    def __init__(self, vocab_size, window_size):
         """
         The Model class predicts the next tokens in a sequence.
 
@@ -16,7 +16,7 @@ class Model(tf.keras.Model):
         super(Model, self).__init__()
 
         self.vocab_size = vocab_size
-        self.window_size = 1633
+        self.window_size = window_size
         self.embedding_size = 64
         self.batch_size = 128
         self.learning_rate = 1e-2
@@ -30,8 +30,11 @@ class Model(tf.keras.Model):
         self.dense1 = tf.keras.layers.Dense(self.rnn_size, activation='relu')
         self.dense2 = tf.keras.layers.Dense(
             self.vocab_size, activation='softmax')
+
+        self.schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+            self.learning_rate, 500, 0.9)
         self.optimizer = tf.keras.optimizers.Adam(
-            learning_rate=self.learning_rate)
+            learning_rate=self.schedule)
 
     def call(self, inputs, initial_state):
         """
@@ -200,8 +203,10 @@ def main():
     test_inputs = np.array(test_inputs, dtype=np.int32)
     test_labels = np.array(test_labels, dtype=np.int32)
 
+    window_size = 20
+
     # initialize model and tensorflow variables
-    model = Model(len(vocab_dict))
+    model = Model(len(vocab_dict), window_size)
 
     print("training")
     # Set-up the training step
