@@ -43,3 +43,6 @@ Then, run `python3 json_to_pickle.py` to create the pickle files in `data/pickle
 
 - https://github.com/songlab-cal/tape
 - (Deprecated TensorFlow) https://github.com/songlab-cal/tape-neurips2019
+
+### Final Writeup
+https://docs.google.com/document/d/1L4aOY5xLsyBFOLO4cOcJ2mWBBOiMR-DaGUfM9t8Ej90
